@@ -585,7 +585,7 @@ void getkey(void)
 {
   int c;
   win_asciikey = 0;
-  cursorflashdelay += win_getspeed(50);
+  cursorflashdelay += win_getspeed(ntsc ? NTSCFRAMERATE : PALFRAMERATE);
 
   prevmouseb = mouseb;
 
