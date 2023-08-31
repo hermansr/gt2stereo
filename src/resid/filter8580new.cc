@@ -621,6 +621,7 @@ Filter::Filter()
   }
 
   enable_filter(true);
+  adjust_filter_bias(0.5);
   set_chip_model(MOS6581);
   set_voice_mask(0x07);
   input(0);
