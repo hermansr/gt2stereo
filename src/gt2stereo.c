@@ -1,5 +1,5 @@
 //
-// GOATTRACKER v2.77 Stereo
+// GOATTRACKER v2.77+ Stereo
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -82,7 +82,7 @@ char instrpath[MAX_PATHNAME];
 char packedpath[MAX_PATHNAME];
 
 extern char *notename[];
-char *programname = "$VER: GoatTracker v2.77 Stereo";
+char *programname = "$VER: GoatTracker v2.77+ Stereo";
 char specialnotenames[186];
 char scalatuningfilepath[MAX_PATHNAME];
 char tuningname[64];
