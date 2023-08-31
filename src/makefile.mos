@@ -6,6 +6,7 @@ CFLAGS=`sdl-config --cflags`
 PREFIX=../morphos/
 SUFFIX=
 LIBS=`sdl-config --libs`
+EXTRA_OBJ=
 
 include makefile.common
 
