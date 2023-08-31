@@ -70,8 +70,8 @@ namespace reSID
 // DAC which controls the VCRs, the NMOS op-amps, and the output buffer.
 //
 //
-// SID filter / mixer / output
-// ---------------------------
+// SID 6581 filter / mixer / output
+// --------------------------------
 //
 //                ---------------------------------------------------
 //               |                                                   |
@@ -102,13 +102,13 @@ namespace reSID
 //     |   |   |   |             |   |   |
 //      ---------------------------------                          12V
 //                 |
-//                 |               D3  --/ --1R2--                  |
-//                 |    ---R8--       |           |   ---R2--       |
-//                 |   |       |   D2 |--/ --2R2--|  |       |  ||--
+//                 |               D3  --/ --1R4--                  |
+//                 |    ---R8--       |           |   ---R3--       |
+//                 |   |       |   D2 |--/ --2R4--|  |       |  ||--
 //                  ------[A>---------|           |-----[A>-----||
-//                                 D1 |--/ --4R2--| (4.25R2)    ||--
+//                                 D1 |--/ --4R4--| (4.25R2)    ||--
 //                        $18         |           |                 |
-//                        0=open   D0  --/ --8R2--  (8.75R2)        |
+//                        0=open   D0  --/ --8R4--  (8.75R2)        |
 //
 //                                                                  vo (AUDIO
 //                                                                      OUT)
@@ -307,6 +307,185 @@ namespace reSID
 // transistors as one.
 //
 // ----------------------------------------------------------------------------
+//
+// SID 8580 filter / mixer / output
+// --------------------------------
+//
+//               +---------------------------------------------------+
+//               |    $17      +----Rf-+                             |
+//               |             |       |                             |
+//               |      D4&!D5 o- \-R3-o                             |
+//               |             |       |                    $17      |
+//               |     !D4&!D5 o- \-R2-o                             |
+//               |             |       |  +---R8-- \--+  !D6&D7      |
+//               |      D4&!D5 o- \-R1-o  |           |              |
+//               |             |       |  o---RC-- \--o   D6&D7      |
+//               |   +---------o--<A]--o--o           |              |
+//               |   |                    o---R4-- \--o  D6&!D7      |
+//               |   |                    |           |              |
+//               |   |                    +---Ri-- \--o !D6&!D7      |
+//               |   |                                |              |
+// $17           |   |                    (CAP2B)     |  (CAP1B)     |
+// 0=to mixer    |   +--R7--+  +---R7--+      +---C---o      +---C---o
+// 1=to filter   |          |  |       |      |       |      |       |
+//               +------R7--o--o--[A>--o--Rfc-o--[A>--o--Rfc-o--[A>--o
+//     ve (EXT IN)          |          |              |              |
+// D3  \ --------------R12--o          |              | (CAP2A)      | (CAP1A)
+//     |   v3               |          | vhp          | vbp          | vlp
+// D2  |   \ -----------R7--o    +-----+              |              |
+//     |   |   v2           |    |                    |              |
+// D1  |   |   \ -------R7--o    |   +----------------+              |
+//     |   |   |   v1       |    |   |                               |
+// D0  |   |   |   \ ---R7--+    |   |   +---------------------------+
+//     |   |   |   |             |   |   |
+//     R9  R5  R5  R5            R5  R5  R5
+//     |   |   |   | $18         |   |   |  $18
+//     |    \  |   | D7: 1=open   \   \   \ D6 - D4: 0=open
+//     |   |   |   |             |   |   |
+//     +---o---o---o-------------o---o---+
+//                 |
+//                 |               D3 +--/ --1R4--+
+//                 |   +---R8--+      |           |  +---R2--+
+//                 |   |       |   D2 o--/ --2R4--o  |       |
+//                 +---o--[A>--o------o           o--o--[A>--o-- vo (AUDIO OUT)
+//                                 D1 o--/ --4R4--o
+//                        $18         |           |
+//                        0=open   D0 +--/ --8R4--+
+//
+//
+//
+//
+// R1 = 15.3*Ri
+// R2 =  7.3*Ri
+// R3 =  4.7*Ri
+// Rf =  1.4*Ri
+// R4 =  1.4*Ri
+// R8 =  2.0*Ri
+// RC =  2.8*Ri
+//
+//
+//
+// Op-amps
+// -------
+// Unlike the 6581, the 8580 has real OpAmps.
+//
+// Temperature compensated differential amplifier:
+//
+//                9V
+//
+//                |
+//      +-------o-o-o-------+
+//      |       |   |       |
+//      |       R   R       |
+//      +--||   |   |   ||--+
+//         ||---o   o---||
+//      +--||   |   |   ||--+
+//      |       |   |       |
+//      o-----+ |   |       o--- Va
+//      |     | |   |       |
+//      +--|| | |   |   ||--+
+//         ||-o-+---+---||
+//      +--||   |   |   ||--+
+//      |       |   |       |
+//              |   |
+//     GND      |   |      GND
+//          ||--+   +--||
+// in- -----||         ||------ in+
+//          ||----o----||
+//                |
+//                8 Current sink
+//                |
+//
+//               GND
+//
+// Inverter + non-inverting output amplifier:
+//
+// Va ---o---||-------------------o--------------------+
+//       |                        |               9V   |
+//       |             +----------+----------+     |   |
+//       |        9V   |          |     9V   | ||--+   |
+//       |         |   |      9V  |      |   +-||      |
+//       |         R   |       |  |  ||--+     ||--+   |
+//       |         |   |   ||--+  +--||            o---o--- Vout
+//       |         o---o---||        ||--+     ||--+
+//       |         |       ||--+         o-----||
+//       |     ||--+           |     ||--+     ||--+
+//       +-----||              o-----||            |
+//             ||--+           |     ||--+
+//                 |           R         |        GND
+//                             |
+//                GND                   GND
+//                            GND
+//
+//
+//
+// Virtual ground
+// --------------
+// A PolySi resitive voltage divider provides the voltage
+// for the non-inverting input of the filter op-amps.
+//
+//     5V
+//          +----------+
+//      |   |   |\     |
+//      R1  +---|-\    |
+// 5V   |       |A >---o--- Vref
+//      o-------|+/
+//  |   |       |/
+// R10  R4
+//  |   |
+//  o---+
+//  |
+// R10
+//  |
+//
+// GND
+//
+// Rn = n*R1
+//
+//
+//
+// Rfc - freq control DAC resistance ladder
+// ----------------------------------------
+// The resistance for the bandpass and lowpass integrator stages of the filter are determined
+// by an 11 bit DAC driven by the FC register.
+// If all 11 bits are '0', the impedance of the DAC would be "infinitely high".
+// To get around this, there is an 11 input NOR gate below the DAC sensing those 11 bits.
+// If they are all 0, the NOR gate gives the gate control voltage to the 12 bit DAC LSB.
+//
+//
+//
+// Crystal stabilized precision switched capacitor voltage divider
+// ---------------------------------------------------------------
+// There is a FET working as a temperature sensor close to the DACs which changes the gate voltage
+// of the frequency control DACs according to the temperature, to reduce its effects on the filter curve.
+// An asynchronous 3 bit binary counter, running at the speed of PHI2, drives two big capacitors
+// which AC resistance is then used as a voltage divider.
+// This implicates that frequency difference between PAL and NTSC might shift the filter curve by 4% or such.
+//
+// https://en.wikipedia.org/wiki/Switched_capacitor
+//
+//                                |\  OpAmp has a smaller capacitor
+//                        Vref ---|+\            than the other OPs
+//                                |A >---o--- Vdac
+//                        o-------|-/    |
+//                        |       |/     |
+//                        |              |
+//       C1               |     C2       |
+//   +---||---o---+   +---o-----||-------o
+//   |        |   |   |   |              |
+//   o----+   |   -----   |              |
+//   |    |   |   -----   +----+   +-----+
+//   |    -----     |          |   |     |
+//   |    -----     |          -----     |
+//   |      |       |          -----     |
+//   |    +-----------+          |       |
+//        | /Q      Q |          +-------+
+//  GND   +-----------+      FET close to DAC
+//        |   clk/8   |      working as temperature sensor
+//        +-----------+
+//          |       |
+//         clk1    clk2
+//
 
 // Compile-time computation of op-amp summer and mixer table offsets.
 
@@ -372,7 +551,6 @@ public:
 protected:
   void set_sum_mix();
   void set_w0();
-  void set_Q();
 
   // Filter enabled.
   bool enabled;
@@ -413,43 +591,52 @@ protected:
   int v2;
   int v1;
 
-  // Cutoff frequency DAC voltage, resonance.
-  int Vddt_Vw_2, Vw_bias;
-  int _8_div_Q;
-  // FIXME: Temporarily used for MOS 8580 emulation.
-  int w0;
-  int _1024_div_Q;
-
   chip_model sid_model;
 
-   typedef struct {
+  typedef struct {
     unsigned short vx;
     short dvx;
   } opamp_t;
 
   typedef struct {
-    int vo_N16;  // Fixed point scaling for 16 bit op-amp output.
     int kVddt;   // K*(Vdd - Vth)
-    int n_snake;
     int voice_scale_s14;
     int voice_DC;
     int ak;
     int bk;
     int vc_min;
     int vc_max;
+    double vo_N16;  // Fixed point scaling for 16 bit op-amp output.
 
     // Reverse op-amp transfer function.
     unsigned short opamp_rev[1 << 16];
     // Lookup tables for gain and summer op-amps in output stage / filter.
     unsigned short summer[summer_offset<5>::value];
     unsigned short gain[16][1 << 16];
+    unsigned short resonance[16][1 << 16];
     unsigned short mixer[mixer_offset<8>::value];
     // Cutoff frequency DAC output voltage table. FC is an 11 bit register.
     unsigned short f0_dac[1 << 11];
   } model_filter_t;
 
-  int solve_gain(opamp_t* opamp, int n, int vi_t, int& x, model_filter_t& mf);
+  // 6581 only
+  // Cutoff frequency DAC voltage, resonance.
+  int Vddt_Vw_2, Vw_bias;
+
+  static int n_snake;
+
+  // 8580 only
+  int n_dac;
+
+  static int n_param;
+
+  // DAC gate voltage
+  int nVgt;
+
+  //int solve_gain(opamp_t* opamp, int n, int vi_t, int& x, model_filter_t& mf);
+  int solve_gain_d(opamp_t* opamp, double n, int vi_t, int& x, model_filter_t& mf);
   int solve_integrate_6581(int dt, int vi_t, int& x, int& vc, model_filter_t& mf);
+  int solve_integrate_8580(int dt, int vi_t, int& x, int& vc, model_filter_t& mf);
 
   // VCR - 6581 only.
   static unsigned short vcr_kVg[1 << 16];
@@ -557,19 +744,13 @@ void Filter::clock(int voice1, int voice2, int voice3)
     // MOS 6581.
     Vlp = solve_integrate_6581(1, Vbp, Vlp_x, Vlp_vc, f);
     Vbp = solve_integrate_6581(1, Vhp, Vbp_x, Vbp_vc, f);
-    Vhp = f.summer[offset + f.gain[_8_div_Q][Vbp] + Vlp + Vi];
+    Vhp = f.summer[offset + f.resonance[res][Vbp] + Vlp + Vi];
   }
   else {
-    // MOS 8580. FIXME: Not yet using op-amp model.
-
-    // delta_t = 1 is converted to seconds given a 1MHz clock by dividing
-    // with 1 000 000.
-
-    int dVbp = w0*(Vhp >> 4) >> 16;
-    int dVlp = w0*(Vbp >> 4) >> 16;
-    Vbp -= dVbp;
-    Vlp -= dVlp;
-    Vhp = (Vbp*_1024_div_Q >> 10) - Vlp - Vi;
+    // MOS 8580.
+    Vlp = solve_integrate_8580(1, Vbp, Vlp_x, Vlp_vc, f);
+    Vbp = solve_integrate_8580(1, Vhp, Vbp_x, Vbp_vc, f);
+    Vhp = f.summer[offset + f.resonance[res][Vbp] + Vlp + Vi];
   }
 }
 
@@ -678,30 +859,22 @@ void Filter::clock(cycle_count delta_t, int voice1, int voice2, int voice3)
       // Calculate filter outputs.
       Vlp = solve_integrate_6581(delta_t_flt, Vbp, Vlp_x, Vlp_vc, f);
       Vbp = solve_integrate_6581(delta_t_flt, Vhp, Vbp_x, Vbp_vc, f);
-      Vhp = f.summer[offset + f.gain[_8_div_Q][Vbp] + Vlp + Vi];
+      Vhp = f.summer[offset + f.resonance[res][Vbp] + Vlp + Vi];
 
       delta_t -= delta_t_flt;
     }
   }
   else {
-    // MOS 8580. FIXME: Not yet using op-amp model.
+    // MOS 8580.
     while (delta_t) {
-      if (delta_t < delta_t_flt) {
+      if (unlikely(delta_t < delta_t_flt)) {
         delta_t_flt = delta_t;
       }
 
-      // delta_t is converted to seconds given a 1MHz clock by dividing
-      // with 1 000 000. This is done in two operations to avoid integer
-      // multiplication overflow.
-
       // Calculate filter outputs.
-      int w0_delta_t = w0*delta_t_flt >> 2;
-
-      int dVbp = w0_delta_t*(Vhp >> 4) >> 14;
-      int dVlp = w0_delta_t*(Vbp >> 4) >> 14;
-      Vbp -= dVbp;
-      Vlp -= dVlp;
-      Vhp = (Vbp*_1024_div_Q >> 10) - Vlp - Vi;
+      Vlp = solve_integrate_8580(delta_t_flt, Vbp, Vlp_x, Vlp_vc, f);
+      Vbp = solve_integrate_8580(delta_t_flt, Vhp, Vbp_x, Vbp_vc, f);
+      Vhp = f.summer[offset + f.resonance[res][Vbp] + Vlp + Vi];
 
       delta_t -= delta_t_flt;
     }
@@ -1276,17 +1449,7 @@ for my $mix (0..2**@i-1) {
   }
 
   // Sum the inputs in the mixer and run the mixer output through the gain.
-  if (sid_model == 0) {
-    return (short)(f.gain[vol][f.mixer[offset + Vi]] - (1 << 15));
-  }
-  else {
-    // FIXME: Temporary code for MOS 8580, should use code above.
-    /* do hard clipping here, else some tunes manage to overflow this
-       (eg /MUSICIANS/L/Linus/64_Forever.sid, starting at 0:44) */
-    int tmp = Vi*(int)vol >> 4;
-    if (tmp < -32768) tmp = -32768;
-    if (tmp > 32767) tmp = 32767;
-    return (short)tmp;  }
+  return (short)(f.gain[vol][f.mixer[offset + Vi]] - (1 << 15));
 }
 
 
@@ -1315,7 +1478,7 @@ Our root function f can thus be written as:
 We are using the mapping function x = vo - vx -> vx. We thus substitute
 for vo = vx + x and get:
 
-  f = (n + 1)*(Vddt - vx)^2 - n*(Vddt - vi)^2 - (Vddt - (vx + x))^2 = 0
+  f(vx) = (n + 1)*(Vddt - vx)^2 - n*(Vddt - vi)^2 - (Vddt - (vx + x))^2 = 0
 
 Using substitution constants
 
@@ -1323,11 +1486,26 @@ Using substitution constants
   b = Vddt
   c = n*(Vddt - vi)^2
 
-the equations for the root function and its derivative can be written as:
+the equations for the root function can be written and expanded as:
 
-  f = a*(b - vx)^2 - c - (b - (vx + x))^2
-  df = 2*((b - (vx + x))*(dvx + 1) - a*(b - vx)*dvx)
+  f(vx) = a*(b - vx)^2 - c - (b - (vx + x))^2
+        = a*(b^2 + vx^2 - 2*b*vx) - c - (b^2 + (vx + x)^2 - 2*b*(vx + x))
+        = a*b^2 + a*vx^2 - 2*a*b*vx - c - b^2 - (vx + x)^2 + 2*b*(vx + x)
+        = a*b^2 + a*vx^2 - 2*a*b*vx - c - b^2 - vx^2 - x^2 - 2*x*vx + 2*b*vx + 2*b*x
+
+Then we calculate the derivative:
+
+  f'(vx) = 2*a*vx - 2*a*b  - 2*vx - 2*x + 2*b
+         = 2*(a*vx - a*b - vx - x + b)
+         = 2*(a*(vx - b) + b - (vx + x))
+         = 2*(b - (vx + x) - a*(b - vx))
+         = 2*(b - vo - a*(b - vx))
+
+Given f'(x) = df/dx, we have the resulting
+
+  df = 2*((b - (vx + x)) - a*(b - vx))*dvx
 */
+#if 0
 RESID_INLINE
 int Filter::solve_gain(opamp_t* opamp, int n, int vi, int& x, model_filter_t& mf)
 {
@@ -1377,6 +1555,80 @@ int Filter::solve_gain(opamp_t* opamp, int n, int vi, int& x, model_filter_t& mf
     // If f(xk) or f'(xk) are zero then we can't improve further.
     if (df) {
         x -= f/df;
+    }
+    if (unlikely(x == xk)) {
+      // No further root improvement possible.
+      return vo;
+    }
+
+    // Narrow down root bracket.
+    if (f < 0) {
+      // f(xk) < 0
+      ak = xk;
+    }
+    else {
+      // f(xk) > 0
+      bk = xk;
+    }
+
+    if (unlikely(x <= ak) || unlikely(x >= bk)) {
+      // Bisection step (ala Dekker's method).
+      x = (ak + bk) >> 1;
+      if (unlikely(x == ak)) {
+        // No further bisection possible.
+        return vo;
+      }
+    }
+  }
+}
+#endif
+RESID_INLINE
+int Filter::solve_gain_d(opamp_t* opamp, double n, int vi, int& x, model_filter_t& mf)
+{
+  // Note that all variables are translated and scaled in order to fit
+  // in 16 bits. It is not necessary to explicitly translate the variables here,
+  // since they are all used in subtractions which cancel out the translation:
+  // (a - t) - (b - t) = a - b
+
+  // Start off with an estimate of x and a root bracket [ak, bk].
+  // f is increasing, so that f(ak) < 0 and f(bk) > 0.
+  int ak = mf.ak, bk = mf.bk;
+
+  double a = n + 1.;
+  int b = mf.kVddt;                            // Scaled by m*2^16
+  double b_vi = b > vi ? double(b - vi) : 0.;  // Scaled by m*2^16
+  double c = n*(b_vi*b_vi);                    // Scaled by m^2*2^32
+
+  for (;;) {
+    int xk = x;
+
+    // Calculate f and df.
+    int vx = opamp[x].vx;      // Scaled by m*2^16
+    int dvx = opamp[x].dvx;    // Scaled by m*2^11
+
+    // f = a*(b - vx)^2 - c - (b - vo)^2
+    // df = 2*((b - vo) - a*(b - vx))*dvx
+    //
+    int vo = vx + (x << 1) - (1 << 16);
+    if (vo > (1 << 16) - 1) {
+      vo = (1 << 16) - 1;
+    }
+    else if (vo < 0) {
+      vo = 0;
+    }
+    double b_vx = b > vx ? double(b - vx) : 0.;
+    double b_vo = b > vo ? double(b - vo) : 0.;
+    // The dividend is scaled by m^2*2^32.
+    double f = a*(b_vx*b_vx) - c - (b_vo*b_vo);
+    // The divisor is scaled by m*2^27.
+    double df = 2.*(b_vo - a*b_vx)*double(dvx);
+    // The resulting quotient is thus scaled by m*2^5.
+
+    // Newton-Raphson step: xk1 = xk - f(xk)/f'(xk)
+    // If f(xk) or f'(xk) are zero then we can't improve further.
+    if (df) {
+        // Multiply by 2^11 so it's scaled by m*2^16.
+        x -= int(double(1<<11)*f/df);
     }
     if (unlikely(x == xk)) {
       // No further root improvement possible.
@@ -1457,10 +1709,10 @@ following substitution:
 
   Vds = Vgst - (Vgst - Vds) = Vgst - Vgdt
 
-  Ids = K*W/L*(2*Vgst - Vds)*Vds
-  = K*W/L*(2*Vgst - (Vgst - Vgdt)*(Vgst - Vgdt)
-  = K*W/L*(Vgst + Vgdt)*(Vgst - Vgdt)
-  = K*W/L*(Vgst^2 - Vgdt^2)
+  Ids = K/2*W/L*(2*Vgst - Vds)*Vds
+  = K/2*W/L*(2*Vgst - (Vgst - Vgdt)*(Vgst - Vgdt)
+  = K/2*W/L*(Vgst + Vgdt)*(Vgst - Vgdt)
+  = K/2*W/L*(Vgst^2 - Vgdt^2)
 
 This turns out to be a general equation which covers both the triode
 and saturation modes (where the second term is 0 in saturation mode).
@@ -1483,7 +1735,7 @@ The EKV model (Enz, Krummenacher and Vittoz) essentially performs this
 blending using an elegant mathematical formulation:
 
   Ids = Is*(if - ir)
-  Is = 2*u*Cox*Ut^2/k*W/L
+  Is = ((2*u*Cox*Ut^2)/k)*W/L
   if = ln^2(1 + e^((k*(Vg - Vt) - Vs)/(2*Ut))
   ir = ln^2(1 + e^((k*(Vg - Vt) - Vd)/(2*Ut))
 
@@ -1540,7 +1792,7 @@ int Filter::solve_integrate_6581(int dt, int vi, int& vx, int& vc, model_filter_
   unsigned int Vgdt_2 = Vgdt*Vgdt;
 
   // "Snake" current, scaled by (1/m)*2^13*m*2^16*m*2^16*2^-15 = m*2^30
-  int n_I_snake = mf.n_snake*(int(Vgst*Vgst - Vgdt_2) >> 15);
+  int n_I_snake = n_snake*(int(Vgst*Vgst - Vgdt_2) >> 15);
 
   // VCR gate voltage.       // Scaled by m*2^16
   // Vg = Vddt - sqrt(((Vddt - Vw)^2 + Vgdt^2)/2)
@@ -1567,6 +1819,50 @@ int Filter::solve_integrate_6581(int dt, int vi, int& vx, int& vc, model_filter_
     vc = mf.vc_max;
   }
 */
+
+  // vx = g(vc)
+  vx = mf.opamp_rev[(vc >> 15) + (1 << 15)];
+
+  // Return vo.
+  return vx + (vc >> 14);
+}
+
+/*
+The 8580 integrator is similar to those found in 6581
+but the resistance is formed by multiple NMOS transistors
+in parallel controlled by the fc bits where the gate voltage
+is driven by a temperature dependent voltage divider.
+
+                 ---C---
+                |       |
+  vi -----Rfc------[A>----- vo
+                vx
+
+  IRfc + ICr = 0
+  IRfc + C*(vc - vc0)/dt = 0
+  dt/C*(IRfc) + vc - vc0 = 0
+  vc = vc0 - n*(IRfc(vi,vx))
+  vc = vc0 - n*(IRfc(vi,g(vc)))
+
+IRfc = K/2*W/L*(Vgst^2 - Vgdt^2) = n*((Vgt - vx)^2 - (Vgt - vi)^2)
+*/
+RESID_INLINE
+int Filter::solve_integrate_8580(int dt, int vi, int& vx, int& vc, model_filter_t& mf)
+{
+  // Note that all variables are translated and scaled in order to fit
+  // in 16 bits. It is not necessary to explicitly translate the variables here,
+  // since they are all used in subtractions which cancel out the translation:
+  // (a - t) - (b - t) = a - b
+
+  // Dac voltages.
+  unsigned int Vgst = nVgt - vx;
+  unsigned int Vgdt = (vi < nVgt) ? nVgt - vi : 0;  // triode/saturation mode
+
+  // Dac current, scaled by (1/m)*2^13*m*2^16*m*2^16*2^-15 = m*2^30
+  int n_I_rfc = n_dac*(int(Vgst*Vgst - Vgdt*Vgdt) >> 15);
+
+  // Change in capacitor charge.
+  vc -= n_I_rfc*dt;
 
   // vx = g(vc)
   vx = mf.opamp_rev[(vc >> 15) + (1 << 15)];
