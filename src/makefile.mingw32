@@ -1,0 +1,15 @@
+#
+# makefile for win32 cross compilation on linux
+#
+
+CC=i686-w64-mingw32-gcc
+CXX=i686-w64-mingw32-g++
+CFLAGS=$(shell i686-w64-mingw32-pkg-config --cflags sdl)
+CXXFLAGS=
+WINDRES=i686-w64-mingw32-windres
+PREFIX=../win32/
+SUFFIX=.exe
+LIBS=$(shell i686-w64-mingw32-pkg-config --libs sdl) -static-libstdc++ -static-libgcc -lssp
+EXTRA_OBJ=goaticon.o
+
+include makefile.common

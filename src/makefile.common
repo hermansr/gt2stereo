@@ -2,8 +2,8 @@
 
 CC?=gcc
 CXX?=g++
-CFLAGS+=-Ibme -Iasm -O3
-CXXFLAGS+=$(CFLAGS) -fpermissive
+CFLAGS+=-Ibme -Iasm -O3 -Wall
+CXXFLAGS+=-O3 -Wall
 
 EXE=	$(PREFIX)gt2stereo$(SUFFIX) \
 	$(PREFIX)ins2snd2$(SUFFIX) \
@@ -11,6 +11,9 @@ EXE=	$(PREFIX)gt2stereo$(SUFFIX) \
 	$(PREFIX)mod2sng2$(SUFFIX)
 
 all: $(EXE)
+
+goaticon.o: gt2stereo.rc
+	$(WINDRES) $< $@
 
 $(PREFIX)gt2stereo$(SUFFIX): goatdata.o gt2stereo.o gsong.o gorder.o gpattern.o ginstr.o gtable.o gplay.o gdisplay.o \
 gfile.o greloc.o ghelp.o gsound.o gconsole.o gsid.o \
@@ -21,7 +24,8 @@ resid-fp/envelopefp.o resid-fp/extfiltfp.o resid-fp/filterfp.o resid-fp/potfp.o 
 resid-fp/wavefp.o resid-fp/voicefp.o \
 asm/asmtab.o asm/chnkpool.o asm/expr.o asm/lexyy.o asm/log.o asm/membuf.o asm/membufio.o asm/namedbuf.o asm/parse.o \
 asm/pc.o asm/vec.o \
-bme/bme_gfx.o bme/bme_snd.o bme/bme_win.o bme/bme_mou.o bme/bme_kbd.o bme/bme_io.o bme/bme_end.o bme/bme.o
+bme/bme_gfx.o bme/bme_snd.o bme/bme_win.o bme/bme_mou.o bme/bme_kbd.o bme/bme_io.o bme/bme_end.o bme/bme.o \
+$(EXTRA_OBJ)
 	$(CXX) -o $@ $^ $(LIBS)
 	strip $@
 
