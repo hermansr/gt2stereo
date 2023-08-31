@@ -4,6 +4,7 @@
 
 CC:=gcc
 CXX:=g++
+WINDRES:=windres
 PREFIX=../win32/
 SUFFIX=.exe
 LIBS=-lmingw32 -lSDLmain -lSDL.dll -mwindows -static-libstdc++ -static-libgcc -static
