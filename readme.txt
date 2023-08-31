@@ -1,8 +1,8 @@
 GoatTracker v2.77 Stereo
 ------------------------
 
-Editor by Lasse Öörni (loorni@gmail.com)
-HardSID 4U support by Téli Sándor.
+Editor by Lasse Ã–Ã¶rni (loorni@gmail.com)
+HardSID 4U support by TÃ©li SÃ¡ndor.
 Uses reSID engine by Dag Lem.
 Uses reSID distortion / nonlinearity by Antti Lankila.
 Uses 6510 crossassembler from Exomizer2 beta by Magnus Lind.
