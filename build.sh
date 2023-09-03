@@ -13,6 +13,9 @@ fi
 # build using native compiler
 cmake -S . -B build
 cmake --build build
+if [[ $1 = install ]] ; then
+  cmake --install build
+fi
 
 if [[ $1 = cross ]] ; then
   # build using 32-bit MinGW-w64 GCC cross-compiler
