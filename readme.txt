@@ -11,6 +11,8 @@ GoatTracker icon by Antonio Vera.
 Command quick reference by Simon Bennett.
 Patches by Stefan A. Haubenthal, Valerio Cannone, Raine M. Ekman and Tero Lindeman.
 Microtonal support by Birgit Jauernig.
+Silver Fork fixes and additions by [Joel Ricci](https://github.com/joelricci)
+Further additions by [Roland Hermans](https://github.com/hermansr).
 
 
 Distributed under GNU General Public License
@@ -141,3 +143,8 @@ v2.76     - Added /Q command line option for setting equal divisions per octave
 v2.77     - Fixed bug in packed songs with no instrument vibrato and only
             calculated speeds.
           - Fixed failure to start up with missing config file parameters.
+
+Unofficial fixes:
+
+          - Macbook keyboard insert support using alt/option + backspace
+          - Better support for some USB keyboards (unwanted characters)
