@@ -123,3 +123,7 @@ add_custom_command(
   COMMAND $<TARGET_FILE:dat2inc> gt2stereo.dat goatdata.c
   DEPENDS dat2inc gt2stereo.dat
   VERBATIM)
+
+install(TARGETS ${PROJECT_NAME} ins2snd2 mod2sng ss2stereo
+    EXPORT ${PROJECT_NAME}
+)
