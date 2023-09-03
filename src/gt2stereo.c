@@ -1,5 +1,5 @@
 //
-// GOATTRACKER v2.77+ Stereo
+// GOATTRACKER Stereo
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include <windows.h>
 #endif
 
+#include "config.h"
 #include "goattrk2.h"
 #include "bme.h"
 
@@ -82,7 +83,9 @@ char instrpath[MAX_PATHNAME];
 char packedpath[MAX_PATHNAME];
 
 extern char *notename[];
-char *programname = "$VER: GoatTracker v2.77+ Stereo";
+#define xstr(s) str(s)
+#define str(s) #s
+char *programname = "$VER: GoatTracker v" xstr(GT2_VERSION_MAJOR) "." xstr(GT2_VERSION_MINOR) "+ Stereo";
 char specialnotenames[186];
 char scalatuningfilepath[MAX_PATHNAME];
 char tuningname[64];

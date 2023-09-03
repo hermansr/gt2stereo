@@ -1,0 +1,7 @@
+#ifndef SRC__CONFIG_H
+#define SRC__CONFIG_H
+
+#define GT2_VERSION_MAJOR @gt2stereo_VERSION_MAJOR@
+#define GT2_VERSION_MINOR @gt2stereo_VERSION_MINOR@
+
+#endif  /* SRC__CONFIG_H */

@@ -151,3 +151,5 @@ Unofficial fixes:
           - Delete using fn + backspace on a Macbook keyboard
           - Delete key works as expected when entering filenames
           - Better support for some USB keyboards (unwanted characters)
+          - Builds on macOS 11 and later
+          - Use CMake-based buildsystem

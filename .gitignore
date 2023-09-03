@@ -1,9 +1,4 @@
 .vscode/
-linux/
-win32/
-*.o
-
-src/bme/dat2inc
-src/bme/datafile
-src/goatdata.c
-src/gt2stereo.dat
+build/
+build-win32/
+build-win64/
