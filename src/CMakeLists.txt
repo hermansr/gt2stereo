@@ -64,6 +64,7 @@ add_executable(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME} bme ${SDL_LIBRARIES} ${extra_libs})
+target_link_options(${PROJECT_NAME} PUBLIC ${SDL_LDFLAGS_OTHER})
 if(GT2_BUILD_WIN32)
   target_sources(${PROJECT_NAME} PRIVATE gt2stereo.rc)
   target_link_options(${PROJECT_NAME} PUBLIC -static-libgcc -static-libstdc++ -lssp)
