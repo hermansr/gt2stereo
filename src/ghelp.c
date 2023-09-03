@@ -43,6 +43,7 @@ void onlinehelp(int standalone,int context)
     "TAB Cycle between editing modes",
     "INS Insert row (Press on endmark to",
     "DEL Delete row change patt. length)",
+    "SHIFT+D Cycle visuals display modes",
     "SHIFT+ESC Clear/optimize all musicdata",
     "ESC Exit program",
     NULL

@@ -10,6 +10,8 @@
 
 void printmainscreen(void);
 void displayupdate(void);
+void displaysetshowvisuals(int visuals);
+void displaynextmode(void);
 void printstatus(void);
 void resettime(void);
 void incrementtime(void);

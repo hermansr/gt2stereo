@@ -6,6 +6,8 @@
 
 #include "goattrk2.h"
 
+#include <math.h>
+
 char *notename[] = 
  {"C-0", "C#0", "D-0", "D#0", "E-0", "F-0", "F#0", "G-0", "G#0", "A-0", "A#0", "B-0",
   "C-1", "C#1", "D-1", "D#1", "E-1", "F-1", "F#1", "G-1", "G#1", "A-1", "A#1", "B-1",
@@ -21,6 +23,8 @@ char timechar[] = {':', ' '};
 int timemin = 0;
 int timesec = 0;
 int timeframe = 0;
+static int displaymode = 1;
+static int showvisuals = 1;
 
 void printmainscreen(void)
 {
@@ -39,6 +43,25 @@ void displayupdate(void)
   }
   printstatus();
   fliptoscreen();
+}
+
+void displaysetshowvisuals(int visuals)
+{
+  showvisuals = visuals;
+  if (!visuals)
+  {
+    printblank(20, 35, 80);
+    printblank(20, 36, 80);
+    printblank(20, 37, 80);
+  }
+}
+
+void displaynextmode(void)
+{
+  displaymode = (displaymode + 1) % 4;
+  printblank(20, 35, 80);
+  printblank(20, 36, 80);
+  printblank(20, 37, 80);
 }
 
 void printstatus(void)
@@ -480,7 +503,7 @@ void printstatus(void)
     }
   }
   sprintf(textbuffer, "OCTAVE %d", epoctave);
-  printtext(0, 35, CTITLE, textbuffer);
+  printtext(0, 36, CTITLE, textbuffer);
 
   switch(autoadvance)
   {
@@ -497,11 +520,11 @@ void printstatus(void)
     break;
   }
 
-  if (recordmode) printtext(0, 36, color, "EDITMODE");
-  else printtext(0, 36, color, "JAM MODE");
+  if (recordmode) printtext(0, 37, color, "EDITMODE");
+  else printtext(0, 37, color, "JAM MODE");
 
-  if (isplaying()) printtext(10, 35, CTITLE, "PLAYING");
-  else printtext(10, 35, CTITLE, "STOPPED");
+  if (isplaying()) printtext(10, 36, CTITLE, "PLAYING");
+  else printtext(10, 36, CTITLE, "STOPPED");
   if (multiplier)
   {
     if (!ntsc)
@@ -517,25 +540,137 @@ void printstatus(void)
       sprintf(textbuffer, " %02d%c%02d ", timemin, timechar[(timeframe/15) & 1], timesec);
   }
 
-  printtext(10, 36, CEDIT, textbuffer);
+  printtext(10, 37, CEDIT, textbuffer);
 
-  printtext(59, 35, CTITLE, " CHN1   CHN2   CHN3   CHN4   CHN5   CHN6");
-  for (c = 0; c < MAX_CHN; c++)
+  if (showvisuals)
   {
-    int chnpos = chn[c].songptr;
-    int chnrow = chn[c].pattptr/4;
-    chnpos--;
-    if (chnpos < 0) chnpos = 0;
-    if (chnrow > pattlen[chn[c].pattnum]) chnrow = pattlen[chn[c].pattnum];
-    if (chnrow >= 100) chnrow -= 100;
+    static const int numsids = 2;
+    static const int numsidvoices = 3;
+    SID_STATE state[numsids];
+    sid_readstate(state, numsids);
 
-    sprintf(textbuffer, "%03d/%02d",
-      chnpos,chnrow);
-    printtext(59+7*c, 36, CEDIT, textbuffer);
+    if (displaymode == 1)
+    {
+      int s;
+      for (s = 0; s < numsids; s++)
+      {
+        int c;
+        for (c = 0; c < numsidvoices; c++)
+        {
+          int env = state[s].voice[c].envelope_counter;
+          int len = env / 16;
+          sprintf(textbuffer, "VOICE %d ENVELOPE", c + 1);
+          printtext(25 + (c * 19), 35, CTITLE, textbuffer);
+          sprintf(textbuffer, "%02X %.*s%*s", env, len, "###############",
+            15 - len, "");
+          printtext(25 + (c * 19), 36 + s, CEDIT, textbuffer);
+        }
+      }
+    }
+    else if (displaymode == 2)
+    {
+      int s;
+      for (s = 0; s < numsids; s++)
+      {
+        int c;
+        for (c = 0; c < numsidvoices; c++)
+        {
+          unsigned int freq = state[s].voice[c].freq;
+          unsigned int pulse = state[s].voice[c].pulse;
+          unsigned int adsr = state[s].voice[c].adsr;
+          unsigned char wave = state[s].voice[c].wave;
+          sprintf(textbuffer, "VOICE %d REGISTERS", c + 1);
+          printtext(25 + (c * 19), 35, CTITLE, textbuffer);
+          sprintf(textbuffer, "%04X %04X %02X %04X", freq, pulse, wave, adsr);
+          printtext(25 + (c * 19), 36 + s, CEDIT, textbuffer);
+        }
+      }
+    }
+    else if (displaymode == 3)
+    {
+      const double fclk = ntsc ? NTSCCLOCKRATE : PALCLOCKRATE;
+      int s;
+      for (s = 0; s < numsids; s++)
+      {
+        int c;
+        for (c = 0; c < numsidvoices; c++)
+        {
+          int note = 94;  /* --- */
+          char detune = ' ';
+          int fn = state[s].voice[c].freq;
+          double fout = (double)fn * fclk / 16777216;
+          if (fout > 0)
+          {
+            int a4offs = round(12.0 * log2(fout / 440.0));
+            note = a4offs + 57;
+            if ((note < 0) || (note >= 93))
+            {
+              note = 94;  /* --- */
+            }
+            else
+            {
+              // Instead of calculating the exact frequency register values for
+              // the note, use the frequency lookup tables of the player. This
+              // prevents the occurence of unwanted detune indicators.
+              //
+              // The exact frequency register values can be calculated like this:
+              // double fout_tuned = 440.0 * pow(2, a4offs / 12.0);
+              // int fn_tuned = round(fout_tuned * 16777216 / fclk);
+              int fn_tuned = (freqtblhi[note] << 8) + freqtbllo[note];
+              if (fn > fn_tuned)
+              {
+                detune = '+';
+              }
+              else if (fn < fn_tuned)
+              {
+                detune = '-';
+              }
+            }
+          }
+          sprintf(textbuffer, "VOICE %d NOTE/FREQ", c + 1);
+          printtext(25 + (c * 19), 35, CTITLE, textbuffer);
+          sprintf(textbuffer, "%-3s%c%8.2f Hz", notename[note], detune, fout);
+          printtext(25 + (c * 19), 36 + s, CEDIT, textbuffer);
+        }
+      }
+    }
+
+    if (displaymode > 0)
+    {
+      int s;
+      for (s = 0; s < numsids; s++)
+      {
+        sprintf(textbuffer, "SID%d", s+1);
+        printtext(20, 36 + s, CTITLE, textbuffer);
+
+        printtext(82, 35, CTITLE, "FC RR MV");
+        sprintf(textbuffer, "%02X %02X %02X", state[s].filter_cutoff >> 4,
+          state[s].filter_res_rout, state[s].filter_mode_volume);
+        printtext(82, 36 + s, CEDIT, textbuffer);
+      }
+    }
   }
 
-  if (etlock) printtext(57, 36, CTITLE, " ");
-    else printtext(57, 36, CTITLE, "U");
+  if (displaymode == 0)
+  {
+    printtext(59, 36, CTITLE, " CHN1   CHN2   CHN3   CHN4   CHN5   CHN6");
+    for (c = 0; c < MAX_CHN; c++)
+    {
+      int chnpos = chn[c].songptr;
+      int chnrow = chn[c].pattptr/4;
+      chnpos--;
+      if (chnpos < 0) chnpos = 0;
+      if (chnrow > pattlen[chn[c].pattnum]) chnrow = pattlen[chn[c].pattnum];
+      if (chnrow >= 100) chnrow -= 100;
+
+      sprintf(textbuffer, "%03d/%02d",
+        chnpos,chnrow);
+      printtext(59+7*c, 37, CEDIT, textbuffer);
+    }
+
+    if (etlock) printtext(57, 37, CTITLE, " ");
+      else printtext(57, 37, CTITLE, "U");
+  }
 }
 
 void resettime(void)
