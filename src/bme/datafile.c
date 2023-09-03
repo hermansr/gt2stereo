@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 
             for (c = strlen(fullname[files]) - 1; c >= 0; c--)
             {
-                if (fullname[files][c] == '\\')
+                if ((fullname[files][c] == '\\') || (fullname[files][c] == '/'))
                 {
                     c++;
                     break;
