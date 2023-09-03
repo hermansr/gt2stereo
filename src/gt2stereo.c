@@ -74,7 +74,7 @@ extern unsigned bigwindow;
 
 char configbuf[MAX_PATHNAME];
 char loadedsongfilename[MAX_FILENAME];
-char songfilename[MAX_FILENAME];
+char songfilename[MAX_PATHNAME];
 char songfilter[MAX_FILENAME];
 char songpath[MAX_PATHNAME];
 char instrfilename[MAX_FILENAME];
