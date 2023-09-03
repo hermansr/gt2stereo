@@ -149,4 +149,5 @@ Unofficial fixes:
           - Macbook keyboard insert support using alt/option + backspace
           - Deleting rows now works correctly on a Macbook keyboard
           - Delete using fn + backspace on a Macbook keyboard
+          - Delete key works as expected when entering filenames
           - Better support for some USB keyboards (unwanted characters)
