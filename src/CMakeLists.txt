@@ -63,11 +63,12 @@ add_executable(${PROJECT_NAME}
   gtable.c
 )
 
-if (GT2_BUILD_WIN32)
-  target_sources(${PROJECT_NAME} PRIVATE gt2stereo.rc)
-  set(extra_libs -lssp)  # to fix issue #2233205 with MinGW64 on Fedora 38
-endif()
 target_link_libraries(${PROJECT_NAME} bme ${SDL_LIBRARIES} ${extra_libs})
+if(GT2_BUILD_WIN32)
+  target_sources(${PROJECT_NAME} PRIVATE gt2stereo.rc)
+  target_link_options(${PROJECT_NAME} PUBLIC -static-libgcc -static-libstdc++ -lssp)
+  # -l ssp is to fix issue #2233205 with MinGW64 on Fedora 38
+endif()
 
 add_executable(ins2snd2
   ins2snd2.c
