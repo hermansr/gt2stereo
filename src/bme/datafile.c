@@ -10,7 +10,7 @@
 #include "bme_end.h"
 
 #define MAXFILES 16384
-#define MAXFILENAME 64
+#define MAXFILENAME 1024
 
 typedef struct
 {
@@ -62,11 +62,11 @@ int main(int argc, char **argv)
     // Get names from list
     for (;;)
     {
-        char searchname[64];
+        char searchname[MAXFILENAME];
         int d;
         FILE *test;
 
-        if (fscanf(listfile, "%63s", searchname) == EOF) break;
+        if (fscanf(listfile, "%1023s", searchname) == EOF) break;
         test = fopen(searchname, "rb");
         if (test)
         {
@@ -93,6 +93,14 @@ int main(int argc, char **argv)
             }
             files++;
             if (files == MAXFILES) break;
+        }
+        else
+        {
+            printf("ERROR: Couldn't open file %s\n", searchname);
+            fclose(listfile);
+            fclose(datafile);
+            remove(argv[1]);
+            return 1;
         }
         if (files == MAXFILES) break;
     }
