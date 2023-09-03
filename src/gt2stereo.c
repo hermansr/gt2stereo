@@ -1536,8 +1536,6 @@ void setspecialnotenames()
   int i;
   int j;
   int oct;
-  char *name;
-  char octave[11];
   
   i = 0;
   oct = 0;
@@ -1549,11 +1547,8 @@ void setspecialnotenames()
         break;
 	  if (i < 93)
       {
-        name = malloc(4);
-        strncpy(name, specialnotenames + j, 2);
-        sprintf(octave, "%d", oct);
-        strcpy(name + 2, octave);
-        notename[i] = name;
+        notename[i] = malloc(4);
+        sprintf(notename[i], "%.2s%d", specialnotenames + j, oct % 10);
         i++;
       }
     }

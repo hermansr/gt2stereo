@@ -116,8 +116,10 @@ void relocator(void)
   int playersize = 0;
   int packedsize = 0;
   FILE *songhandle = NULL;
+#ifndef GT2RELOC
   int selectdone;
   int opt = 0;
+#endif
   unsigned char speedcode[] = {0xa2,0x00,0x8e,0x04,0xdc,0xa2,0x00,0x8e,0x05,0xdc};
   int c,d,e;
   unsigned char patttemp[512];
@@ -1934,7 +1936,7 @@ void insertlabel(const char *name)
 {
   char insertbuffer[80];
 
-  sprintf(insertbuffer, "%s:\n", name);
+  sprintf(insertbuffer, "%.77s:\n", name);
   inserttext(insertbuffer);
 }
 
@@ -1981,7 +1983,7 @@ void insertaddrlo(const char *name)
 {
   char insertbuffer[80];
 
-  sprintf(insertbuffer, "                .BYTE (%s %% 256)\n", name);
+  sprintf(insertbuffer, "                .BYTE (%.48s %% 256)\n", name);
   inserttext(insertbuffer);
 }
 
@@ -1989,7 +1991,7 @@ void insertaddrhi(const char *name)
 {
   char insertbuffer[80];
 
-  sprintf(insertbuffer, "                .BYTE (%s / 256)\n", name);
+  sprintf(insertbuffer, "                .BYTE (%.48s / 256)\n", name);
   inserttext(insertbuffer);
 }
 

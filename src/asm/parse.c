@@ -646,6 +646,7 @@ void asm_include(const char *msg)
     asm_src_buffer_push(src);
 }
 
+#if 0
 void symbol_dump_resolved(int level, const char *symbol)
 {
     i32 value;
@@ -671,6 +672,7 @@ void symbol_dump_resolved(int level, const char *symbol)
         LOG(level, ("symbol \"%s\" not found\n", symbol));
     }
 }
+#endif
 
 void output_atoms(struct membuf *out, struct vec *atoms)
 {

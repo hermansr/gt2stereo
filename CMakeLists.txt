@@ -12,6 +12,6 @@ if (GT2_BUILD_WIN32)
   message(STATUS "Including Win32 support")
 endif()
 
-add_compile_options(-Wall -O2)
+add_compile_options(-Wall -Werror -O2)
 
 add_subdirectory(src)
