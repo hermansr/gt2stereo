@@ -152,4 +152,6 @@ Unofficial fixes:
           - Delete key works as expected when entering filenames
           - Better support for some USB keyboards (unwanted characters)
           - Builds on macOS 11 and later
+          - Use latest reSID as included in VICE
+          - Add SID visualizations to status bar
           - Use CMake-based buildsystem
