@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 
 find_package(SDL)
-if(NOT ${SDL_FOUND})
+if(NOT SDL_FOUND)
   # e.g. Fedora 38 does not provide a SDL CMake config file for MingW64
   message(STATUS "SDL not found using CMake config, falling back to pkg-config")
   find_package(PkgConfig REQUIRED)
