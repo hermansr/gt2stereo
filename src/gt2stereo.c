@@ -22,8 +22,8 @@
 #include <windows.h>
 #endif
 
-#include "config.h"
 #include "goattrk2.h"
+#include "config.h"
 #include "bme.h"
 
 int menu = 0;
